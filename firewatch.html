@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIREWATCH — A Story About Wilderness and Solitude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Oswald:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --orange-deep:    #c9420a;
+  --orange-mid:     #e85d20;
+  --orange-warm:    #f07334;
+  --amber:          #f5a623;
+  --amber-light:    #ffc85a;
+  --sky-dusk:       #2b4a6b;
+  --sky-night:      #1a2e42;
+  --sky-dawn:       #d4603a;
+  --pine-dark:      #1a2e1a;
+  --pine-mid:       #2d4a2d;
+  --pine-light:     #3d6b3d;
+  --rock:           #7a5c3a;
+  --rock-light:     #a07a52;
+  --cream:          #f5e8d0;
+  --cream-dark:     #e8d5b0;
+  --smoke:          #c8b89a;
+  --smoke-dark:     #8a7a62;
+  --bg:             #0d1a0d;
+  --text:           #e8d5b0;
+  --accent:         #f07334;
+  --border:         rgba(240,115,52,0.25);
+  --panel:          rgba(13,26,13,0.88);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Libre Baskerville', serif;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--orange-deep); border-radius: 2px; }
+::selection { background: rgba(240,115,52,0.3); color: var(--amber-light); }
+
+/* GRAIN */
+body::after {
+  content:''; position:fixed; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:9990; opacity:0.7; mix-blend-mode:overlay;
+}
+
+/* ── AUDIO BTN ── */
+#audio-btn {
+  position: fixed; top:20px; right:24px; z-index:9999;
+  background: rgba(13,26,13,0.85);
+  border: 1px solid var(--border);
+  color: var(--amber);
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px; letter-spacing: 3px;
+  padding: 8px 16px; cursor: pointer;
+  transition: all 0.3s;
+}
+#audio-btn:hover { background: rgba(240,115,52,0.15); border-color: var(--orange-mid); }
+
+/* ── NAV ── */
+nav {
+  position: fixed; left:0; top:0; bottom:0; width: 210px;
+  background: linear-gradient(to right, rgba(10,18,10,0.97), rgba(10,18,10,0.75));
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 40px 0; z-index: 200; backdrop-filter: blur(6px);
+}
+nav::before, nav::after {
+  content:''; position:absolute; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--orange-mid), transparent);
+}
+nav::before { top:0; } nav::after { bottom:0; }
+
+.nav-brand {
+  text-align:center; padding: 0 20px 32px;
+  border-bottom: 1px solid var(--border); margin-bottom:24px;
+}
+.nav-brand span {
+  font-family:'Oswald',sans-serif; font-size:10px; font-weight:300;
+  letter-spacing:5px; color:var(--orange-deep); text-transform:uppercase;
+}
+
+nav ul { list-style:none; }
+nav ul li a {
+  display:block; padding: 12px 28px;
+  font-family:'Oswald',sans-serif; font-size:11px;
+  letter-spacing:3px; color:var(--smoke);
+  text-decoration:none; text-transform:uppercase;
+  transition:all 0.3s; position:relative; border-left: 2px solid transparent;
+}
+nav ul li a:hover, nav ul li a.active {
+  color:var(--amber-light); padding-left:36px;
+  border-left-color: var(--orange-mid);
+  background: rgba(240,115,52,0.06);
+}
+
+.nav-coords {
+  text-align:center; padding-top:32px; margin-top:24px;
+  border-top: 1px solid var(--border);
+  font-family:'Oswald',sans-serif; font-size:9px;
+  letter-spacing:2px; color:var(--smoke-dark);
+  line-height: 1.8;
+}
+
+/* ── MAIN ── */
+main { margin-left:210px; position:relative; z-index:10; }
+
+/* ── HERO ── */
+#hero {
+  height: 100vh; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+
+/* SVG LANDSCAPE layers */
+.landscape-wrap {
+  position:absolute; inset:0; width:100%; height:100%;
+}
+.landscape-layer { position:absolute; bottom:0; left:0; width:100%; }
+
+.title-wrap {
+  position:relative; z-index:20; text-align:center;
+  padding: 0 60px;
+}
+.hero-eyebrow {
+  font-family:'Oswald',sans-serif; font-size:30px; letter-spacing:8px;
+  color:var(--amber); text-transform:uppercase; margin-bottom:16px;
+  opacity:0; animation: fadeUp 1s 0.5s forwards;
+}
+h1.fw-title {
+  font-family:'Playfair Display',serif; font-size: clamp(70px,10vw,140px);
+  font-weight:900; font-style:italic;
+  color: var(--cream);
+  text-shadow: 0 0 80px rgba(201,66,10,0.5), 0 4px 0 rgba(0,0,0,0.5);
+  line-height:0.9; letter-spacing:-2px; margin-bottom:18px;
+  opacity:0; animation: fadeUp 1s 0.8s forwards;
+}
+.hero-sub {
+  font-family:'Libre Baskerville',serif; font-style:italic;
+  font-size:18px; color:var(--smoke); letter-spacing:2px;
+  margin-bottom:40px;
+  opacity:0; animation: fadeUp 1s 1.1s forwards;
+}
+.hero-btn {
+  display:inline-block; font-family:'Oswald',sans-serif;
+  font-size:11px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--amber); border:1px solid var(--orange-deep);
+  padding:13px 40px; text-decoration:none;
+  transition:all 0.4s; position:relative; overflow:hidden;
+  opacity:0; animation: fadeUp 1s 1.5s forwards;
+}
+.hero-btn::before {
+  content:''; position:absolute; inset:0;
+  background:var(--orange-deep); transform:scaleX(0);
+  transform-origin:left; transition:transform 0.4s; z-index:-1;
+}
+.hero-btn:hover { color:var(--cream); }
+.hero-btn:hover::before { transform:scaleX(1); }
+
+.hero-scroll {
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  font-family:'Oswald',sans-serif; font-size:9px; letter-spacing:5px;
+  color:var(--orange-deep); text-transform:uppercase;
+  animation:breathe 2s infinite;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+.hero-scroll::after { content:'↓'; font-size:14px; }
+
+/* ── SECTIONS ── */
+section {
+  position:relative; padding:90px 80px;
+  border-top: 1px solid var(--border);
+}
+section::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(240,115,52,0.02), transparent 40%);
+  pointer-events:none;
+}
+
+.sec-label {
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:6px;
+  color:var(--orange-deep); text-transform:uppercase; margin-bottom:14px;
+  display:flex; align-items:center; gap:14px;
+}
+.sec-label::before { content:''; height:1px; width:40px; background:var(--orange-deep); }
+
+.sec-title {
+  font-family:'Playfair Display',serif; font-weight:700;
+  font-size: clamp(32px,4.5vw,62px); color:var(--cream);
+  line-height:1.1; margin-bottom:10px;
+  text-shadow: 0 0 50px rgba(201,66,10,0.2);
+}
+
+.ornament {
+  display:flex; align-items:center; gap:14px; margin-bottom:38px;
+}
+.ornament::after {
+  content:''; height:1px; width:160px;
+  background:linear-gradient(90deg, var(--orange-deep), transparent);
+}
+.ornament span { color:var(--orange-mid); font-size:13px; }
+
+p.body {
+  font-size:17px; line-height:1.95; color:var(--smoke);
+  max-width:780px; margin-bottom:24px;
+}
+p.body em { color:var(--amber-light); font-style:italic; }
+p.body strong { color:var(--cream); font-weight:700; }
+
+/* ── INTRO: STORY LANDSCAPE BANNER ── */
+.landscape-banner {
+  width:100%; height:220px; position:relative;
+  margin: 40px 0; overflow:hidden; border:1px solid var(--border);
+}
+
+/* ── STORY: TWO-COL ── */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:start; }
+.two-col-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:28px; }
+
+/* STORY CARDS */
+.story-card {
+  padding:28px; border:1px solid var(--border);
+  background:rgba(13,20,13,0.7); position:relative;
+  transition:all 0.35s; overflow:hidden;
+}
+.story-card::before {
+  content:''; position:absolute; top:-1px; left:20px;
+  width:50px; height:2px; background:var(--orange-mid);
+}
+.story-card:hover { border-color:rgba(240,115,52,0.5); transform:translateY(-3px); background:rgba(240,115,52,0.04); }
+.story-card h3 {
+  font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:3px;
+  color:var(--amber); text-transform:uppercase; margin-bottom:12px;
+}
+.story-card p { font-size:14.5px; line-height:1.8; color:var(--smoke); }
+
+/* ── GAMEPLAY PHOTOS ── */
+.photo-section {
+  display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:40px 0;
+}
+.photo-card {
+  position:relative; overflow:hidden;
+  border:1px solid var(--border);
+}
+.photo-scene {
+  width:100%; height:220px; display:block; position:relative;
+}
+.photo-caption {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(transparent, rgba(10,16,10,0.95));
+  padding:30px 20px 14px;
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:3px;
+  color:var(--amber); text-transform:uppercase;
+}
+.photo-card:hover .photo-scene { transform:scale(1.03); transition:transform 0.5s; }
+
+/* RADIO TRANSCRIPT */
+.radio-transcript {
+  background:rgba(13,20,13,0.8); border:1px solid var(--border);
+  border-left: 3px solid var(--orange-mid);
+  padding:32px 36px; margin:36px 0; position:relative;
+}
+.radio-transcript::before {
+  content:'📻  RADIO TRANSMISSION';
+  position:absolute; top:-12px; left:24px;
+  background:var(--bg); padding:0 12px;
+  font-family:'Oswald',sans-serif; font-size:9px; letter-spacing:4px;
+  color:var(--orange-mid);
+}
+.radio-transcript p { font-size:17px; font-style:italic; line-height:1.9; color:var(--cream); }
+.radio-transcript .speaker {
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:3px;
+  color:var(--orange-deep); text-transform:uppercase; margin-bottom:8px;
+  font-style:normal;
+}
+
+/* QUOTE */
+.big-quote {
+  border-left:3px solid var(--orange-mid); padding:24px 34px;
+  margin:38px 0; background:rgba(240,115,52,0.04); position:relative;
+}
+.big-quote::before {
+  content:'"'; position:absolute; top:-16px; left:20px;
+  font-family:'Playfair Display',serif; font-size:80px;
+  color:var(--orange-deep); opacity:0.25; line-height:1;
+}
+.big-quote p { font-size:19px; font-style:italic; line-height:1.85; color:var(--cream); }
+.big-quote cite {
+  display:block; margin-top:12px;
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:3px;
+  color:var(--orange-deep); text-transform:uppercase; font-style:normal;
+}
+
+/* THEORY CARDS */
+.theories-grid { display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:34px; }
+.theory-card {
+  padding:32px; border:1px solid rgba(240,115,52,0.2);
+  background:rgba(13,20,13,0.8); position:relative; transition:all 0.3s;
+}
+.theory-card:hover { border-color:rgba(240,115,52,0.5); }
+.theory-status {
+  display:inline-block; font-family:'Oswald',sans-serif;
+  font-size:9px; letter-spacing:3px; text-transform:uppercase;
+  padding:4px 12px; margin-bottom:16px;
+}
+.status-plausible { background:rgba(245,166,35,0.15); color:var(--amber); border:1px solid rgba(245,166,35,0.3); }
+.status-debunked { background:rgba(201,66,10,0.15); color:var(--orange-mid); border:1px solid rgba(201,66,10,0.3); }
+.status-open { background:rgba(43,74,107,0.3); color:#7ab0d4; border:1px solid rgba(43,74,107,0.5); }
+.theory-card h3 {
+  font-family:'Playfair Display',serif; font-size:19px;
+  color:var(--cream); margin-bottom:12px; font-style:italic;
+}
+.theory-card p { font-size:14.5px; line-height:1.8; color:var(--smoke); }
+
+/* EVIDENCE LIST */
+.evidence-list { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+.evidence-list li {
+  font-size:13px; color:var(--smoke-dark); padding:5px 0;
+  padding-left:20px; position:relative; list-style:none;
+}
+.evidence-list li::before { content:'▸'; position:absolute; left:0; color:var(--orange-deep); }
+
+/* CHARACTERS */
+.chars-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:34px; }
+.char-card {
+  padding:32px; border:1px solid var(--border);
+  background:rgba(13,20,13,0.7); display:flex; gap:24px; transition:all 0.3s;
+}
+.char-card:hover { border-color:rgba(240,115,52,0.45); background:rgba(240,115,52,0.03); }
+.char-avatar {
+  width:70px; height:70px; border-radius:50%;
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  font-size:28px; border:2px solid var(--border);
+}
+.char-info h3 {
+  font-family:'Playfair Display',serif; font-size:20px;
+  color:var(--cream); margin-bottom:4px;
+}
+.char-role {
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:3px;
+  color:var(--orange-deep); text-transform:uppercase; margin-bottom:10px;
+}
+.char-info p { font-size:14px; line-height:1.75; color:var(--smoke); }
+
+/* TIMELINE */
+.timeline { position:relative; padding-left:30px; margin-top:34px; }
+.timeline::before {
+  content:''; position:absolute; left:8px; top:0; bottom:0;
+  width:1px; background:linear-gradient(180deg, var(--orange-mid), transparent);
+}
+.tl-item { position:relative; margin-bottom:32px; }
+.tl-item::before {
+  content:''; position:absolute; left:-26px; top:6px;
+  width:10px; height:10px; border-radius:50%;
+  background:var(--orange-mid); box-shadow:0 0 10px var(--orange-mid);
+}
+.tl-day {
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:3px;
+  color:var(--orange-deep); text-transform:uppercase; margin-bottom:6px;
+}
+.tl-event { font-size:15px; line-height:1.75; color:var(--smoke); }
+.tl-event strong { color:var(--cream); }
+
+/* BEYOND CARDS */
+.beyond-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:34px; }
+.beyond-card {
+  padding:28px; border:1px solid var(--border);
+  background:rgba(13,20,13,0.7); text-align:center; transition:all 0.3s;
+}
+.beyond-card:hover { border-color:rgba(240,115,52,0.5); transform:translateY(-3px); }
+.beyond-icon { font-size:36px; margin-bottom:16px; }
+.beyond-card h3 {
+  font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:3px;
+  color:var(--amber); text-transform:uppercase; margin-bottom:12px;
+}
+.beyond-card p { font-size:14px; line-height:1.8; color:var(--smoke); }
+
+/* WHY PLAY */
+.reasons-list { display:flex; flex-direction:column; gap:20px; margin-top:34px; max-width:850px; }
+.reason-row {
+  display:flex; gap:26px; align-items:flex-start;
+  padding:22px 26px; border:1px solid var(--border);
+  background:rgba(13,20,13,0.6); transition:all 0.3s;
+  position:relative; overflow:hidden;
+}
+.reason-row::before {
+  content:''; position:absolute; left:0; top:0; bottom:0;
+  width:2px; background:var(--orange-mid); transform:scaleY(0); transition:transform 0.4s;
+}
+.reason-row:hover::before { transform:scaleY(1); }
+.reason-row:hover { background:rgba(240,115,52,0.04); border-color:rgba(240,115,52,0.4); }
+.reason-num {
+  font-family:'Playfair Display',serif; font-size:28px;
+  color:var(--orange-deep); min-width:38px; line-height:1; padding-top:3px;
+}
+.reason-text h3 {
+  font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:3px;
+  color:var(--amber-light); text-transform:uppercase; margin-bottom:8px;
+}
+.reason-text p { font-size:15px; line-height:1.78; color:var(--smoke); }
+
+/* PERSONAL */
+.personal-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:34px; }
+.personal-card {
+  padding:30px; border:1px solid rgba(201,66,10,0.25);
+  background:rgba(10,14,10,0.8); position:relative; transition:all 0.3s;
+}
+.personal-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(201,66,10,0.06), transparent);
+}
+.personal-card:hover { border-color:rgba(201,66,10,0.5); box-shadow:0 0 30px rgba(201,66,10,0.1); }
+.personal-icon { font-size:26px; margin-bottom:14px; }
+.personal-card h3 {
+  font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:3px;
+  color:var(--orange-mid); text-transform:uppercase; margin-bottom:12px;
+}
+.personal-card p { font-size:15px; line-height:1.82; color:var(--smoke); position:relative; }
+
+/* CLOSING */
+#closing {
+  min-height:60vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; padding:80px;
+}
+.closing-title {
+  font-family:'Playfair Display',serif; font-size:clamp(32px,5vw,64px);
+  font-style:italic; color:var(--cream); margin-bottom:22px;
+  text-shadow:0 0 60px rgba(201,66,10,0.35);
+}
+.closing-sub { font-size:18px; font-style:italic; color:var(--smoke); max-width:600px; line-height:1.9; }
+.closing-line { margin:28px auto; width:180px; height:1px; background:linear-gradient(90deg,transparent,var(--orange-mid),transparent); }
+.closing-tag {
+  font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:6px;
+  color:var(--orange-deep); text-transform:uppercase; margin-top:30px;
+}
+
+/* RIPPLE */
+.ripple {
+  position:fixed; border-radius:50%;
+  border:1px solid var(--amber); pointer-events:none;
+  transform:scale(0); opacity:1; z-index:9999;
+  animation:rippleOut 0.6s ease-out forwards;
+}
+
+/* REVEAL */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity 0.75s ease, transform 0.75s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* STATS ROW */
+.stats-row { display:flex; gap:0; margin:40px 0; flex-wrap:wrap; }
+.stat-box {
+  flex:1; min-width:160px; padding:28px 24px; border:1px solid var(--border);
+  border-right:none; background:rgba(13,20,13,0.7); text-align:center;
+  transition:all 0.3s;
+}
+.stat-box:last-child { border-right:1px solid var(--border); }
+.stat-box:hover { background:rgba(240,115,52,0.05); }
+.stat-num {
+  font-family:'Playfair Display',serif; font-size:36px;
+  color:var(--amber); margin-bottom:6px; display:block;
+}
+.stat-label {
+  font-family:'Oswald',sans-serif; font-size:9px; letter-spacing:4px;
+  color:var(--smoke-dark); text-transform:uppercase;
+}
+
+/* SECTION BIG NUMBER */
+.sec-num {
+  position:absolute; right:60px; top:60px;
+  font-family:'Playfair Display',serif; font-size:110px;
+  color:rgba(240,115,52,0.04); line-height:1; pointer-events:none; font-style:italic;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes breathe {
+  0%,100% { opacity:0.5; transform:translateX(-50%) translateY(0); }
+  50%     { opacity:1;   transform:translateX(-50%) translateY(-5px); }
+}
+@keyframes rippleOut {
+  to { transform:scale(5); opacity:0; }
+}
+@keyframes floatSpark {
+  0%   { opacity:0; transform:translateY(0) scale(1); }
+  10%  { opacity:1; }
+  90%  { opacity:0.2; }
+  100% { opacity:0; transform:translateY(-100px) scale(0.2); }
+}
+@keyframes sunray {
+  0%,100% { opacity:0.15; }
+  50%     { opacity:0.28; }
+}
+/* Fotos redondas dentro dos cards */
+.foto-personagem {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.foto-redonda-personagem {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--orange-mid);
+    transition: all 0.3s ease;
+}
+
+.char-card:hover .foto-redonda-personagem {
+    border-color: var(--amber);
+    transform: scale(1.05);
+}
+
+/* Ajuste do grid para 6 personagens (2 colunas de 3) */
+.chars-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-top: 34px;
+}
+
+/* Estilo do card */
+.char-card {
+    padding: 32px;
+    border: 1px solid var(--border);
+    background: rgba(13,20,13,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.char-card:hover {
+    border-color: rgba(240,115,52,0.45);
+    background: rgba(240,115,52,0.03);
+    transform: translateY(-5px);
+}
+
+.char-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--cream);
+    margin-bottom: 8px;
+}
+
+.char-role {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--orange-deep);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.char-info p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--smoke);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .chars-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+    
+    .foto-redonda-personagem {
+        width: 100px;
+        height: 100px;
+    }
+}
+</style>
+</head>
+<body>
+
+<button id="audio-btn" onclick="toggleAudio()">♪ AMBIENT: ON</button>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand"><span>Firewatch</span></div>
+  <ul>
+    <li><a href="#hero"     class="nav-link active">▸ Title</a></li>
+    <li><a href="#intro"    class="nav-link">▸ The Game</a></li>
+    <li><a href="#story"    class="nav-link">▸ The Story</a></li>
+    <li><a href="#gameplay" class="nav-link">▸ Characters</a></li>
+    <li><a href="#personal" class="nav-link">▸ My Connection</a></li>
+  </ul>
+  <div class="nav-coords">
+    41°41′N 109°54′W<br>
+    Shoshone National Forest<br>
+    Wyoming, USA
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+<section id="hero" style="padding:0; border:none;">
+  <div class="landscape-wrap">
+    <!-- Layered SVG Landscape -->
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice"
+         style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <linearGradient id="sky-hero" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stop-color="#0e1a2e"/>
+          <stop offset="35%"  stop-color="#1f3550"/>
+          <stop offset="65%"  stop-color="#b84010"/>
+          <stop offset="85%"  stop-color="#d4603a"/>
+          <stop offset="100%" stop-color="#e87030"/>
+        </linearGradient>
+        <linearGradient id="sun-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffc85a" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#e87030" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffc85a" stop-opacity="0.9"/>
+          <stop offset="40%" stop-color="#f07334" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#b84010" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="haze" cx="50%" cy="90%" r="60%">
+          <stop offset="0%" stop-color="#e87030" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#e87030" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="blur-light"><feGaussianBlur stdDeviation="8"/></filter>
+        <filter id="blur-sm"><feGaussianBlur stdDeviation="2"/></filter>
+      </defs>
+
+      <!-- SKY -->
+      <rect width="1200" height="700" fill="url(#sky-hero)"/>
+
+      <!-- SUN HAZE -->
+      <ellipse cx="600" cy="380" rx="300" ry="180" fill="url(#haze)"/>
+
+      <!-- SUN -->
+      <circle cx="600" cy="370" r="90" fill="url(#sun-glow)" filter="url(#blur-light)" style="animation:sunray 4s infinite;"/>
+      <circle cx="600" cy="370" r="40" fill="#ffc85a" opacity="0.85"/>
+
+      <!-- SUN RAYS (thin lines) -->
+      <g opacity="0.12" stroke="#ffc85a" stroke-width="1">
+        <line x1="600" y1="300" x2="600" y2="180"/>
+        <line x1="600" y1="440" x2="600" y2="560"/>
+        <line x1="530" y1="340" x2="450" y2="290"/>
+        <line x1="670" y1="340" x2="750" y2="290"/>
+        <line x1="540" y1="405" x2="460" y2="445"/>
+        <line x1="660" y1="405" x2="740" y2="445"/>
+      </g>
+
+      <!-- CLOUDS -->
+      <ellipse cx="200" cy="200" rx="120" ry="35" fill="#1a3050" opacity="0.6"/>
+      <ellipse cx="160" cy="190" rx="80"  ry="28" fill="#1a3050" opacity="0.5"/>
+      <ellipse cx="900" cy="160" rx="140" ry="38" fill="#1a3050" opacity="0.55"/>
+      <ellipse cx="950" cy="150" rx="90"  ry="25" fill="#1a3050" opacity="0.4"/>
+      <ellipse cx="1050" cy="230" rx="100" ry="30" fill="#1a3050" opacity="0.45"/>
+
+      <!-- DISTANT MOUNTAINS - layer 4 (farthest) -->
+      <path d="M0,500 L80,380 L160,430 L250,340 L340,410 L420,320 L510,390 L600,310 L690,380 L780,300 L870,370 L960,290 L1050,360 L1140,300 L1200,360 L1200,700 L0,700 Z"
+            fill="#1e3550" opacity="0.7"/>
+
+      <!-- DISTANT MOUNTAINS - layer 3 -->
+      <path d="M0,560 L60,460 L130,510 L220,430 L300,480 L400,400 L480,455 L560,390 L650,450 L730,400 L820,460 L900,410 L980,470 L1060,415 L1140,460 L1200,430 L1200,700 L0,700 Z"
+            fill="#253d25" opacity="0.8"/>
+
+      <!-- MID HILLS - layer 2 -->
+      <path d="M0,590 L100,510 L200,540 L300,490 L430,540 L520,500 L600,520 L700,495 L800,530 L900,500 L1000,540 L1100,505 L1200,530 L1200,700 L0,700 Z"
+            fill="#2d4a2d"/>
+
+      <!-- PINE TREES - mid distance -->
+      <g fill="#1a2e1a">
+        <!-- Left cluster -->
+        <polygon points="40,590 55,540 70,590"/>
+        <polygon points="60,600 78,542 96,600"/>
+        <polygon points="85,595 102,538 119,595"/>
+        <polygon points="105,600 125,535 145,600"/>
+        <polygon points="130,592 148,540 166,592"/>
+
+        <!-- Right cluster -->
+        <polygon points="1050,588 1068,535 1086,588"/>
+        <polygon points="1075,600 1095,536 1115,600"/>
+        <polygon points="1100,594 1118,538 1136,594"/>
+        <polygon points="1130,600 1150,535 1170,600"/>
+        <polygon points="1155,590 1172,542 1189,590"/>
+
+        <!-- Mid clusters -->
+        <polygon points="350,595 368,542 386,595"/>
+        <polygon points="370,605 390,538 410,605"/>
+        <polygon points="800,590 818,537 836,590"/>
+        <polygon points="820,600 840,535 860,600"/>
+      </g>
+
+      <!-- FOREGROUND GROUND -->
+      <path d="M0,630 Q300,610 600,625 Q900,640 1200,618 L1200,700 L0,700 Z"
+            fill="#1a2e1a"/>
+
+      <!-- FOREGROUND PINE TREES (large, dark) -->
+      <g fill="#0d1a0d">
+        <polygon points="-20,700 10,580 40,700"/>
+        <polygon points="10,700 50,555 90,700"/>
+        <polygon points="70,700 115,540 160,700"/>
+        <polygon points="140,700 190,560 240,700"/>
+
+        <polygon points="960,700 1005,550 1050,700"/>
+        <polygon points="1030,700 1080,555 1130,700"/>
+        <polygon points="1100,700 1148,545 1196,700"/>
+        <polygon points="1150,700 1200,560 1250,700"/>
+      </g>
+
+      <!-- LOOKOUT TOWER (Henry's tower) -->
+      <g transform="translate(565, 390)">
+        <!-- Legs -->
+        <line x1="20" y1="0" x2="-5" y2="80" stroke="#0d1a0d" stroke-width="2.5"/>
+        <line x1="50" y1="0" x2="75" y2="80" stroke="#0d1a0d" stroke-width="2.5"/>
+        <!-- Cross braces -->
+        <line x1="15" y1="20" x2="55" y2="40" stroke="#0d1a0d" stroke-width="1.2"/>
+        <line x1="55" y1="20" x2="15" y2="40" stroke="#0d1a0d" stroke-width="1.2"/>
+        <line x1="10" y1="50" x2="60" y2="65" stroke="#0d1a0d" stroke-width="1.2"/>
+        <!-- Platform -->
+        <rect x="8" y="-8" width="54" height="10" fill="#1a2e1a" rx="1"/>
+        <!-- Cabin -->
+        <rect x="12" y="-32" width="46" height="28" fill="#1a2e1a" rx="1"/>
+        <!-- Roof -->
+        <polygon points="8,-32 35,-48 62,-32" fill="#0d1a0d"/>
+        <!-- Window glow -->
+        <rect x="18" y="-26" width="14" height="10" fill="#f5a623" opacity="0.7"/>
+        <rect x="36" y="-26" width="14" height="10" fill="#f5a623" opacity="0.5"/>
+        <!-- Light beam from window -->
+        <path d="M18,-20 L-20,30 L50,30 L46,-20 Z" fill="#ffc85a" opacity="0.06"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Title -->
+  <div class="title-wrap">
+    <p class="hero-eyebrow">A TEDEX, By me.</p>
+    <h1 class="fw-title">Firewatch</h1>
+    <p class="hero-sub">A story about feelings, and what really matters...</p>
+    <a href="#intro" class="hero-btn">Better late than never!</a>
+  </div>
+  <div class="hero-scroll">Hike Down</div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ INTRO ═══════════════════════════════════════ -->
+<section id="intro">
+  <div class="sec-num">01</div>
+  <div class="sec-label">Chapter I</div>
+  <h2 class="sec-title">What is Firewatch?</h2>
+  <div class="ornament"><span>✦</span></div>
+
+  <div class="two-col">
+    <div>
+      <p class="body reveal">
+        <em>Firewatch</em> is a first-person mystery adventure game developed by <strong>Campo Santo</strong> and published in February 2016. It arrived like a forest fire.
+      </p>
+      <p class="body reveal">
+        You play as <strong>Henry</strong>, a man running away from a life that has grown too heavy to carry. He takes a summer job as a fire lookout in the Shoshone National Forest in Wyoming — isolated, unreachable, alone with his thoughts and a two-way radio that connects him to his new supervisor/boss, <strong>Delilah</strong>.
+      </p>
+      <p class="body reveal">
+        The game unfolds over the course of a summer. No combat. No enemies (thats what you think). Just you, the wilderness, and a voice on the radio that slowly becomes the most important relationship in your life.
+      </p>
+      <p class="body reveal">
+        Then things begin to feel wrong.
+      </p>
+    </div>
+    <div>
+      <video width="640" height="360" controls>
+        <source src="beautyoffirewatch.mp4" type="video/mp4">
+      </video>
+  <!-- STATS -->
+
+</section>
+
+
+<!-- ═══════════════════════════════════════ STORY ═══════════════════════════════════════ -->
+<section id="story">
+  <div class="sec-num">02</div>
+  <div class="sec-label">Chapter II</div>
+  <h2 class="sec-title">The Story —<br>From Prologue to Wildfire</h2>
+  <div class="ornament"><span>✦</span></div>
+
+  <p class="body reveal">
+    Firewatch does not beggin with gameplay, but with text. A series of choices that narrate Henry's life before he run away. how he met his wife, Julia, at a bar, how they fell in love, how she nedeed a dog and childs, and how she was diagnosed with early-onset dementia, and how he — unable to understand the universe — fled to the wilderness. It is a gut-punch of an introduction, and it arrives before you've even touched the game.
+  </p>
+<div>
+  <video width="800" height="540" controls>
+    <source src="firewhatchintro.mp4" type="video/mp4">
+  </video>
+</div>
+  <div class="big-quote reveal">
+    <p>You are a man who has run away from his life. The forest doesn't care why. It is patient, and ancient, and it has seen everything that humans do to each other and to themselves.</p>
+    <cite>— Henry when come to Wyoming</cite>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="sec-label" style="margin-top:44px">Day-by-Day: The Story Unfolds</div>
+  <div class="timeline reveal">
+    <div class="tl-item">
+      <div class="tl-day">Day 1 — Arrival</div>
+      <div class="tl-event">Henry arrives at his fire lookout tower in Shoshone National Forest. He meets <strong>Delilah</strong> via radio for the first time, and settles in. Everything feels heavy. Quiet. Good.</div>
+        <img width="200" height="130" src="theday1.webp" alt="">
+</div>
+    <div class="tl-item">
+      <div class="tl-day">First Weeks — Two Voices</div>
+      <div class="tl-event">Henry and Delilah begin building a relationship over the radio. It is warm and, sometimes, flirtatious. They share their days, their histories, their jokes. The relationship feels real in a rare way.</div>
+            <img width="200" height="130" src="weeks.avif" alt="">
+</div>
+    <div class="tl-item">
+      <div class="tl-day">The Girls — First Incident</div>
+      <div class="tl-event">Henry meet two teenage girls camping where they shouldn't be, and he confronts them. Later, their camp is found <strong>violently destroyed</strong> — equipment shattered, tent ripped apart. No sign of the girls. (Does Henry really is who we think he is?)</div>
+            <img width="200" height="130" src="thegirls.webp" alt="">
+</div>
+    <div class="tl-item">
+      <div class="tl-day">The Fence — Someone is Watching</div>
+      <div class="tl-event">Henry discovers a section of the park that doesn't appear on any map. Strange equipment. Strange sounds. Someone has been there recently.(Or does Henry started becoming crazy?)</div>
+            <img width="200" height="130" src="mapness.avif" alt="">
+</div>
+    <div class="tl-item">
+      <div class="tl-day">The Cache — Evidences</div>
+      <div class="tl-event"><strong>Henry discovers he is being watched.</strong> someone has been monitoring his radio conversations with Delilah. Transcripts. Personal notes. The paranoia becomes justified — and the mystery starts.</div>
+            <img width="200" height="130" src="crazyno" alt="">
+</div>
+    <div class="tl-item">
+    </div>
+    <div class="tl-item">
+    <div class="tl-item">
+      <div class="tl-day">The Ending — Everything Burns</div>
+      <div class="tl-event">A massive fire breaks out across the forest. Evacuation orders are issued. Henry and Delilah escape via helicopter and boat respectively — but they don't meet. They say goodbye over the radio as the forest burns behind them. <strong>They may never see each other.</strong> Henry must go back to his wife Julia. To his real life. The ending is not a answear. It is an acceptance.</div>
+                <img width="200" height="130" src="ending.jpg" alt="">
+</div>
+  <!-- RADIO TRANSCRIPTS -->
+  <div class="sec-label" style="margin-top:50px">Voices in the Wilderness</div>
+  <p class="body reveal">The relationship between Henry and Delilah is carried entirely through radio dialogue. These are some of the most memorable exchanges:</p>
+
+  <div class="radio-transcript reveal">
+    <p class="speaker">Delilah:</p>
+    <p>"You know what I think? I think you're the only interesting thing that's happened to me all summer. That's not a compliment. That's a cry for help."</p>
+  </div>
+
+  <div class="radio-transcript reveal">
+    <p class="speaker">Henry:</p>
+    <p>"I came here to be alone." <br><br><span style="color:var(--smoke-dark)">[long pause]</span><br><br> "I think I'm not very good at it."</p>
+  </div>
+
+  <div class="radio-transcript reveal">
+    <p class="speaker">Delilah:</p>
+    <p>"This is what I know about you, Henry. You love your wife. You're lonely. You make terrible jokes when you're nervous. And you're out here for the same reason I am — because it's easier to be alone than to try and not be."</p>
+  </div>
+
+  <div class="story-card reveal" style="max-width:720px">
+    <h3>What the Story Is Really About</h3>
+    <p>Firewatch is not a mystery story wearing an emotional costume. It is an emotional story wearing a mystery costume. It's not a firewatcher game (sorry if this job doesnt exist teather), its about decisions. </p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════ CHARACTERS ═══════════════════════════════════════ -->
+<section id="gameplay">
+  <div class="sec-num">03</div>
+  <div class="sec-label">Chapter III</div>
+  <h2 class="sec-title">The Characters</h2>
+  <div class="ornament"><span>✦</span></div>
+
+  <div class="chars-grid reveal">
+    <!-- Personagem 1 - Henry -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="Henry.webp" alt="Henry" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Henry</h3>
+        <div class="char-role">The Player</div>
+        <p> Henry loves Julia deeply, but he cannot watch her disappear, so he runs instead. He is self-depressive, anxious, and lazy, but sometimes funny and lovable, like a big and fat panda.</p>
+      </div>
+    </div>
+
+    <!-- Personagem 2 - Delilah -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="firewatchradio.jpg" alt="Delilah" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Delilah</h3>
+        <div class="char-role">Supervisor — Two Towers South</div>
+        <p>Delilah is Henry's supervisor, and, sometimes, something closer to his best friend. She has been running from her own past for longer than Henry has.</p>
+      </div>
+    </div>
+
+    <!-- Personagem 3 - Julia -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="HenryEsposa.avif" alt="Julia" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Julia</h3>
+        <div class="char-role">Henry's Wife — Absent but Present</div>
+        <p>Julia never appears. She referenced, felt. But she is everywhere in the game and in every choice Henry makes. Her sickness has taken pieces of her that will not return. Henry's love for her is the emotional core of everything.</p>
+      </div>
+    </div>
+
+    <!-- Personagem 4 - Ned Goodwin -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="nedgoodwin.webp" alt="Ned Goodwin" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Ned Goodwin</h3>
+        <div class="char-role">The Ghost in the Forest</div>
+        <p>Ned is the great mystery of the game. A firefighter who disappeared, unabble to face the worl, after his son died in a climbing accident.
+        </p>
+      </div>
+    </div>
+
+    <!-- Personagem 5 - Brian Goodwin -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="briangoodwin.webp" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Brian Goodwin</h3>
+        <div class="char-role">Ned's Son — The Tragedy</div>
+        <p>Brian is the Ned's son. A boy who loved climbing and exploring, who died in an accident. His death is what broke Ned and sent him into crazyness.</p>
+      </div>
+    </div>
+
+    <!-- Personagem 6 - Body -->
+    <div class="char-card">
+      <div class="foto-personagem">
+        <img src="goodwinsbody.jpg" class="foto-redonda-personagem">
+      </div>
+      <div class="char-info">
+        <h3>Kid's body</h3>
+        <div class="char-role">The little adventurer.</div>
+          <p>A body found in a deep cave that appears to be Ned Goodwin's little boy. That's make us undesrtand why Ned become crazy, and, at a moment, feel sad for him.</p>
+      </div>
+    </div>
+  </div>
+    <!-- Full-width landscape banner -->
+  <div style="margin:50px 0; position:relative; height:200px; overflow:hidden; border:1px solid var(--border);">
+    <svg viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <linearGradient id="banner-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0e1a2e"/>
+          <stop offset="50%" stop-color="#6b2510"/>
+          <stop offset="100%" stop-color="#c9420a"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="200" fill="url(#banner-sky)"/>
+      <circle cx="600" cy="80" r="60" fill="#ffc85a" opacity="0.25" filter="url(#blur-light)"/>
+      <circle cx="600" cy="80" r="25" fill="#f5a623" opacity="0.6"/>
+      <path d="M0,140 L60,100 L120,120 L200,88 L280,110 L360,82 L440,105 L520,80 L600,100 L680,78 L760,102 L840,80 L920,105 L1000,82 L1080,100 L1160,85 L1200,98 L1200,200 L0,200Z" fill="#253d25"/>
+      <path d="M0,165 L100,148 L200,158 L300,142 L400,155 L500,140 L600,155 L700,138 L800,155 L900,140 L1000,155 L1100,142 L1200,155 L1200,200 L0,200Z" fill="#1a2e1a"/>
+      <g fill="#0d1a0d">
+        <polygon points="0,200 18,155 36,200"/>
+        <polygon points="24,200 46,145 68,200"/>
+        <polygon points="55,200 80,138 105,200"/>
+        <polygon points="1100,200 1122,148 1144,200"/>
+        <polygon points="1138,200 1162,140 1186,200"/>
+        <polygon points="1170,200 1195,150 1220,200"/>
+      </g>
+    </svg>
+    <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:6px;color:var(--amber);text-transform:uppercase;text-align:center;white-space:nowrap;">
+      Shoshone National Forest — Summer, 1988
+</section>
+
+<!-- ═══════════════════════════════════════ PERSONAL ═══════════════════════════════════════ -->
+<section id="personal">
+  <div class="sec-num">04</div>
+  <div class="sec-label">Chapter IV — Personal</div>
+  <h2 class="sec-title">My Connection<br>to <s>Firewatch</s> all the games</h2>
+  <div class="ornament"><span>♥</span></div>
+<p class="hero-eyebrow">Firewatch</p>
+  <video width="800" height="500" src="firewatchgameplay.mp4" controls></video>
+  <p class="body reveal">Firewatch is not a game I talk about often.
+     It's the kind of game you keep to yourself a little, 
+     like a place you found and don't want to share too nobody, 
+      because something about it belongs to the version of you that found it, and makes the version of you that you became after all.</p>
+<p class="hero-eyebrow">Slime Rancher (1 and 2)</p>
+  <video width="800" height="500" src="slimeranchergameplay.mp4" controls></video>
+<p class="body reveal">Slime rancher... what an idiot game, it's so dumb and nonsense, but if taking care of slimes teatch me someting,
+  are that in some moments of your life, you will need to choose... Choose betwen two paths. The life is too much for a little bit of time.
+</p>
+<p class="hero-eyebrow">Red Dead Redemption 2</p>
+  <video width="800" height="500" src="redead2gameplay.mp4" controls></video>
+<p class="body reveal">No such a word to describe this, one more game about decisions (and redemption of this decisions), connections,  and things in life that you will never have time to do. But it's controversial, because wuen you become afraid, the game teatches you that "it's nothing to be afraid of". </p>
+<p class="hero-eyebrow">Elden Ring</p>
+  <video width="800" height="500" src="eldenringgameplay.mp4" controls></video>
+<p class="body reveal">My favorite game? It's not too simple to say. But Elden Ring is a important part of me and my life, once it's the first game i became abble to play on my first videogame. Thats such an achievement to little me. like in The Little Prince dedication once said: "all gtown-up were children first, but only few of then does remember that.", so, even playing for the first time as an "grown-up", this game was important to me, when I was a child.</p>
+<!-- ═══════════════════════════════════════ CLOSING ═══════════════════════════════════════ -->
+<section id="closing" style="border-top:1px solid var(--border);">
+  <!-- Closing landscape -->
+  <div style="position:absolute;inset:0;overflow:hidden;opacity:0.4;pointer-events:none;">
+    <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+      <defs>
+        <linearGradient id="close-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0e1a2e"/>
+          <stop offset="60%" stop-color="#4a1a08"/>
+          <stop offset="100%" stop-color="#c9420a"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="600" fill="url(#close-sky)"/>
+      <circle cx="600" cy="280" r="120" fill="#ffc85a" opacity="0.15" filter="url(#blur-light)"/>
+      <circle cx="600" cy="280" r="45" fill="#f5a623" opacity="0.35"/>
+      <path d="M0,420 L100,340 L200,380 L350,300 L500,350 L600,310 L700,345 L850,298 L1000,340 L1100,305 L1200,330 L1200,600 L0,600Z" fill="#253d25" opacity="0.6"/>
+      <path d="M0,490 L200,450 L400,470 L600,445 L800,468 L1000,445 L1200,462 L1200,600 L0,600Z" fill="#1a2e1a" opacity="0.8"/>
+      <g fill="#0d1a0d" opacity="0.9">
+        <polygon points="0,600 30,500 60,600"/>
+        <polygon points="40,600 75,485 110,600"/>
+        <polygon points="90,600 130,478 170,600"/>
+        <polygon points="1040,600 1075,488 1110,600"/>
+        <polygon points="1100,600 1138,480 1176,600"/>
+        <polygon points="1150,600 1188,492 1226,600"/>
+      </g>
+    </svg>
+  </div>
+
+  <div style="position:relative;z-index:10;text-align:center;">
+    <h2 class="closing-title">Go Back to the World</h2>
+    <div class="closing-line"></div>
+    <p class="closing-sub">The fire has burned through. The radio is silent. The forest is still standing — older than you, indifferent to you, beautiful without your permission. You came here to hide. You are leaving changed.</p>
+    <p class="closing-sub" style="margin-top:20px">That is what Firewatch does. That is why it matters.</p>
+    <div class="closing-tag" style="margin-top:40px">Wyoming, 1988 — Campo Santo — Firewatch</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── WEB AUDIO ENGINE ──
+let audioCtx = null, masterGain = null, audioOn = true, audioInited = false, ambientLoop = null;
+
+function initAudio() {
+  if (audioInited) return;
+  audioInited = true;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.15;
+  masterGain.connect(audioCtx.destination);
+  playAmbient();
+  ambientLoop = setInterval(playAmbient, 14000);
+}
+
+let audioElement = null; // Variável para armazenar o elemento de áudio
+
+function playAmbient() {
+  if (!audioCtx || !audioOn) return;
+  
+  // Se já existe um áudio tocando, não cria outro
+  if (audioElement && !audioElement.paused) return;
+  
+  // Criar elemento de áudio
+  audioElement = new Audio("musicintro.mp3"); // ← MUDE AQUI o nome do arquivo
+  audioElement.loop = true; // Faz a música repetir
+  audioElement.volume = 0.15; // Volume inicial (15%)
+  
+  // Conectar ao gain node do Web Audio para controle unificado
+  const source = audioCtx.createMediaElementSource(audioElement);
+  source.connect(masterGain);
+  source.connect(audioCtx.destination);
+  
+  audioElement.play().catch(e => console.log('Áudio precisa de interação do usuário'));
+}
+
+function playClickSound() {
+  if (!audioCtx) return;
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) {
+    const t = i / audioCtx.sampleRate;
+    d[i] = (Math.sin(2 * Math.PI * 440 * t) * Math.exp(-t * 25) * 0.4)
+           + ((Math.random() * 2 - 1) * Math.exp(-t * 60) * 0.15);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const g = audioCtx.createGain(); g.gain.value = 0.35;
+  src.connect(g); g.connect(audioCtx.destination);
+  src.start();
+}
+
+function playNavSound() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(660, audioCtx.currentTime + 0.1);
+  g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+}
+
+function toggleAudio() {
+  if (!audioInited) { initAudio(); return; }
+  audioOn = !audioOn;
+  
+  // Controlar a música ambiente
+  if (audioOn) {
+    if (audioElement && audioElement.paused) {
+      audioElement.play().catch(e => console.log('Erro ao tocar'));
+    } else if (!audioElement) {
+      playAmbient(); // Criar e tocar se não existir
+    }
+    masterGain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.3);
+  } else {
+    if (audioElement && !audioElement.paused) {
+      audioElement.pause();
+    }
+    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+  }
+  
+  document.getElementById('audio-btn').textContent = `♪ AMBIENT: ${audioOn ? 'ON' : 'OFF'}`;
+}
+
+// Start on first click
+document.addEventListener('click', () => { if (!audioInited) initAudio(); }, { once: true });
+
+// ── CLICK RIPPLE + SOUND ──
+document.addEventListener('click', (e) => {
+  if (audioInited) playClickSound();
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.cssText = `width:36px;height:36px;left:${e.clientX-18}px;top:${e.clientY-18}px;`;
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+});
+
+document.querySelectorAll('nav a').forEach(a =>
+  a.addEventListener('click', () => { if (audioInited) playNavSound(); })
+);
+
+// ── CURSOR SPARKLE ──
+let lastS = 0;
+document.addEventListener('mousemove', e => {
+  const now = Date.now();
+  if (now - lastS < 70) return;
+  lastS = now;
+  const d = document.createElement('div');
+  d.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:3px;height:3px;
+    border-radius:50%;background:rgba(240,115,52,0.55);pointer-events:none;z-index:9998;
+    animation:rippleOut 0.5s ease forwards;transform:translate(-50%,-50%);`;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 500);
+});
+
+// ── PARTICLE CANVAS ──
+const canvas = document.createElement('canvas');
+canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:1;';
+document.body.prepend(canvas);
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeC() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeC(); window.addEventListener('resize', resizeC);
+
+function mkParticle() {
+  return {
+    x: Math.random() * canvas.width,
+    y: canvas.height + 5,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: -(Math.random() * 0.8 + 0.15),
+    life: 1,
+    size: Math.random() * 1.8 + 0.4,
+    hue: 15 + Math.random() * 25, // orange range
+  };
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (Math.random() < 0.06) particles.push(mkParticle());
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.life -= 0.004;
+    ctx.globalAlpha = p.life * 0.55;
+    ctx.fillStyle = `hsl(${p.hue}, 80%, 60%)`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ── SCROLL REVEAL ──
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      const siblings = Array.from(entry.target.parentNode.children).filter(c => c.classList.contains('reveal'));
+      const idx = siblings.indexOf(entry.target);
+      setTimeout(() => entry.target.classList.add('visible'), idx * 90);
+      revealObs.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// ── ACTIVE NAV ──
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY + window.innerHeight * 0.35 >= s.offsetTop) cur = s.id; });
+  navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+});
+
+// ── PARALLAX HERO ──
+const hero = document.getElementById('hero');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if (y < window.innerHeight) {
+    const layers = hero.querySelectorAll('.landscape-layer');
+    // simple parallax via SVG transform on scroll would be complex; title drifts
+    const tw = hero.querySelector('.title-wrap');
+    if (tw) tw.style.transform = `translateY(${y * 0.25}px)`;
+  }
+});
+</script>
+</body>
+</html>
